@@ -1,0 +1,17 @@
+[package]
+name = "vigil-reporter"
+version = "0.0.1"
+description = "Vigil Reporter for Node. Used in pair with Vigil, the Microservices Status Page."
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/valeriansaliou/rs-vigil-reporter"
+repository = "https://github.com/valeriansaliou/rs-vigil-reporter.git"
+keywords = ["vigil", "microservices", "monitoring", "integration"]
+categories = ["web-programming"]
+authors = ["Valerian Saliou <valerian@valeriansaliou.name>"]
+
+[badges]
+travis-ci = { repository = "valeriansaliou/rs-vigil-reporter", branch = "master" }
+
+[lib]
+name = "vigil_reporter"
