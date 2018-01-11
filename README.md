@@ -2,8 +2,8 @@
 
 [![Build Status](https://img.shields.io/travis/valeriansaliou/rs-vigil-reporter/master.svg)](https://travis-ci.org/valeriansaliou/rs-vigil-reporter)
 
-[Documentation](https://docs.rs/crate/vigil-reporter)
-[Crate](https://crates.io/crates/vigil-reporter)
+* [Documentation](https://docs.rs/crate/vigil-reporter)
+* [Crate](https://crates.io/crates/vigil-reporter)
 
 **Vigil Reporter for Rust. Used in pair with Vigil, the Microservices Status Page.**
 
