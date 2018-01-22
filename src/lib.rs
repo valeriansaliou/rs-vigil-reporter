@@ -2,9 +2,18 @@
 
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate serde_derive;
+extern crate sys_info;
+extern crate reqwest;
 
 use std::thread;
 use std::time::Duration;
+use std::cmp::max;
+
+use sys_info::{cpu_num, loadavg, mem_info};
+use reqwest::{Client, StatusCode, RedirectPolicy};
+use reqwest::header::{Headers, Authorization, Basic};
 
 static LOG_NAME: &'static str = "Vigil Reporter";
 
@@ -22,12 +31,23 @@ pub struct ReporterBuilder<'a> {
 }
 
 struct ReporterManager {
-    url: String,
-    token: String,
-    probe_id: String,
-    node_id: String,
+    report_url: String,
     replica_id: String,
     interval: Duration,
+    client: Client,
+}
+
+#[derive(Serialize, Debug)]
+struct ReportPayload<'a> {
+    replica: &'a str,
+    interval: u64,
+    load: ReportPayloadLoad,
+}
+
+#[derive(Serialize, Debug)]
+struct ReportPayloadLoad {
+    cpu: f32,
+    ram: f32,
 }
 
 impl <'a>Reporter<'a> {
@@ -47,16 +67,30 @@ impl <'a>Reporter<'a> {
     pub fn run(&self) -> Result<(), ()> {
         debug!("{}: Will run using URL: {}", LOG_NAME, self.url);
 
+        // Build HTTP client
+        let mut headers = Headers::new();
+
+        headers.set(Authorization(Basic {
+           username: "".to_owned(),
+           password: Some(self.token.to_owned())
+        }));
+
+        let http_client = Client::builder()
+            .timeout(Duration::from_secs(10))
+            .redirect(RedirectPolicy::none())
+            .gzip(true)
+            .enable_hostname_verification()
+            .default_headers(headers)
+            .build();
+
         // Build thread manager context?
-        match (self.probe_id, self.node_id, self.replica_id) {
-            (Some(probe_id), Some(node_id), Some(replica_id)) => {
+        match (self.probe_id, self.node_id, self.replica_id, http_client) {
+            (Some(probe_id), Some(node_id), Some(replica_id), Ok(client)) => {
                 let manager = ReporterManager {
-                    url: self.url.to_owned(),
-                    token: self.token.to_owned(),
-                    probe_id: probe_id.to_owned(),
-                    node_id: node_id.to_owned(),
+                    report_url: format!("{}/reporter/{}/{}/", self.url, probe_id, node_id),
                     replica_id: replica_id.to_owned(),
                     interval: self.interval,
+                    client: client,
                 };
 
                 // Spawn thread
@@ -74,8 +108,10 @@ impl <'a>Reporter<'a> {
         // TODO: use channels to stop the thread
         // @see: https://stackoverflow.com/questions/26199926/how-to-terminate-or-suspend-a-rust-thread-from-another-thread
 
+        // TODO: park thread to ensure it ends properly (blocks)
+
         // TODO
-        Err(())
+        Ok(())
     }
 }
 
@@ -127,7 +163,7 @@ impl ReporterManager {
         thread::sleep(Duration::from_secs(10));
 
         loop {
-            self.report();
+            self.report().ok();
 
             thread::sleep(self.interval);
         }
@@ -135,13 +171,54 @@ impl ReporterManager {
         debug!("{}: Now ended", LOG_NAME);
     }
 
-    fn report(&self) {
+    fn report(&self) -> Result<(), ()> {
         debug!("{}: Will dispatch request", LOG_NAME);
 
-        // TODO: be fault tolerant
-        // TODO: enforce timeout
-        // TODO: handle and log all errors
+        // Generate report payload
+        let payload = ReportPayload {
+            replica: &self.replica_id,
+            interval: self.interval.as_secs(),
+            load: ReportPayloadLoad {
+                cpu: Self::get_load_cpu(),
+                ram: Self::get_load_ram(),
+            },
+        };
 
-        debug!("{}: Request succeeded", LOG_NAME);
+        debug!("{}: Will send request payload: {:?}", LOG_NAME, payload);
+
+        // Submit report payload
+        let response = self.client
+            .post(&self.report_url)
+            .json(&payload)
+            .send();
+
+        if let Ok(response_inner) = response {
+            if response_inner.status() == StatusCode::Ok {
+                debug!("{}: Request succeeded", LOG_NAME);
+
+                return Ok(());
+            }
+        }
+
+        error!("{}: Failed dispatching request", LOG_NAME);
+
+        Err(())
+    }
+
+    fn get_load_cpu() -> f32 {
+        match (cpu_num(), loadavg()) {
+            (Ok(cpu_num_value), Ok(loadavg_value)) => {
+                (loadavg_value.fifteen / (max(cpu_num_value, 1) as f64)) as f32
+            },
+            _ => 0.00
+        }
+    }
+
+    fn get_load_ram() -> f32 {
+        if let Ok(mem_info_value) = mem_info() {
+            1.00 - ((mem_info_value.free as f32) / (mem_info_value.total as f32))
+        } else {
+            0.00
+        }
     }
 }
