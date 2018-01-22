@@ -27,6 +27,7 @@ vigil-reporter = "1.0"
 ```rust
 extern crate vigil_reporter;
 
+use std::time::Duration;
 use vigil_reporter::Reporter;
 
 // Build reporter
@@ -36,7 +37,6 @@ let reporter = Reporter::new("https://status.example.com", "YOUR_TOKEN_SECRET")
   .node_id("socket-client")           // Node ID containing Replica
   .replica_id("192.168.1.10")         // Unique Replica ID for instance (ie. your IP on the LAN)
   .interval(Duration::from_secs(30))  // Reporting interval (in seconds; defaults to 30 seconds if not set)
-  .debug(true)                        // Whether to debug or not
   .build();
 
 // Run reporter (starts reporting)

@@ -15,3 +15,9 @@ travis-ci = { repository = "valeriansaliou/rs-vigil-reporter", branch = "master"
 
 [lib]
 name = "vigil_reporter"
+
+[dependencies]
+log = "0.4"
+
+[dev-dependencies]
+env_logger = "0.5"
