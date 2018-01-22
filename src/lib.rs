@@ -1,4 +1,4 @@
-//! rs-vigil-reporter Vigil Reporter for Rust. Used in pair with Vigil, the Microservices Status Page.
+//! rs-vigil-reporter Vigil Reporter for Rust.
 
 #[macro_use]
 extern crate log;
@@ -50,7 +50,7 @@ struct ReportPayloadLoad {
     ram: f32,
 }
 
-impl <'a>Reporter<'a> {
+impl<'a> Reporter<'a> {
     pub fn new(url: &'a str, token: &'a str) -> ReporterBuilder<'a> {
         ReporterBuilder {
             reporter: Reporter {
@@ -60,7 +60,7 @@ impl <'a>Reporter<'a> {
                 node_id: None,
                 replica_id: None,
                 interval: Duration::from_secs(30),
-            }
+            },
         }
     }
 
@@ -71,8 +71,8 @@ impl <'a>Reporter<'a> {
         let mut headers = Headers::new();
 
         headers.set(Authorization(Basic {
-           username: "".to_owned(),
-           password: Some(self.token.to_owned())
+            username: "".to_owned(),
+            password: Some(self.token.to_owned()),
         }));
 
         let http_client = Client::builder()
@@ -99,13 +99,13 @@ impl <'a>Reporter<'a> {
                     .spawn(move || manager.run())
                     .or(Err(()))
                     .and(Ok(()))
-            },
+            }
             _ => Err(()),
         }
     }
 }
 
-impl <'a>ReporterBuilder<'a> {
+impl<'a> ReporterBuilder<'a> {
     pub fn build(self) -> Reporter<'a> {
         if self.reporter.probe_id.is_none() {
             panic!("missing probe_id");
@@ -173,15 +173,14 @@ impl ReporterManager {
         };
 
         debug!(
-            "{}: Will send request to URL: {} with payload: {:?}", LOG_NAME, &self.report_url,
+            "{}: Will send request to URL: {} with payload: {:?}",
+            LOG_NAME,
+            &self.report_url,
             payload
         );
 
         // Submit report payload
-        let response = self.client
-            .post(&self.report_url)
-            .json(&payload)
-            .send();
+        let response = self.client.post(&self.report_url).json(&payload).send();
 
         if let Ok(response_inner) = response {
             let status = response_inner.status();
@@ -204,8 +203,8 @@ impl ReporterManager {
         match (cpu_num(), loadavg()) {
             (Ok(cpu_num_value), Ok(loadavg_value)) => {
                 (loadavg_value.fifteen / (max(cpu_num_value, 1) as f64)) as f32
-            },
-            _ => 0.00
+            }
+            _ => 0.00,
         }
     }
 
