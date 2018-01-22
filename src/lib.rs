@@ -94,24 +94,14 @@ impl <'a>Reporter<'a> {
                 };
 
                 // Spawn thread
-                thread::spawn(move || manager.run());
-
-                Ok(())
+                thread::Builder::new()
+                    .name("vigil-reporter".to_string())
+                    .spawn(move || manager.run())
+                    .or(Err(()))
+                    .and(Ok(()))
             },
             _ => Err(()),
         }
-    }
-
-    pub fn end(&self) -> Result<(), ()> {
-        debug!("{}: Will end", LOG_NAME);
-
-        // TODO: use channels to stop the thread
-        // @see: https://stackoverflow.com/questions/26199926/how-to-terminate-or-suspend-a-rust-thread-from-another-thread
-
-        // TODO: park thread to ensure it ends properly (blocks)
-
-        // TODO
-        Ok(())
     }
 }
 
@@ -167,8 +157,6 @@ impl ReporterManager {
 
             thread::sleep(self.interval);
         }
-
-        debug!("{}: Now ended", LOG_NAME);
     }
 
     fn report(&self) -> Result<(), ()> {
@@ -184,7 +172,10 @@ impl ReporterManager {
             },
         };
 
-        debug!("{}: Will send request payload: {:?}", LOG_NAME, payload);
+        debug!(
+            "{}: Will send request to URL: {} with payload: {:?}", LOG_NAME, &self.report_url,
+            payload
+        );
 
         // Submit report payload
         let response = self.client

@@ -75,6 +75,4 @@ fn run_and_end_valid() {
 
     // Hold on while the first reporting request fires (in the wild)
     thread::sleep(Duration::from_secs(15));
-
-    assert_eq!(reporter.end().is_ok(), true);
 }

@@ -20,7 +20,7 @@ vigil-reporter = "1.0"
 
 ## How to use?
 
-### 1. Create reporter
+### Create reporter
 
 `vigil-reporter` can be instantiated as such:
 
@@ -41,15 +41,6 @@ let reporter = Reporter::new("https://status.example.com", "YOUR_TOKEN_SECRET")
 
 // Run reporter (starts reporting)
 reporter.run();
-```
-
-### 2. Teardown reporter
-
-If you need to teardown an active reporter, you can use the `end()` method to unbind it.
-
-```javascript
-// End reporter (stops reporting)
-reporter.end();
 ```
 
 ## What is Vigil?
