@@ -184,10 +184,14 @@ impl ReporterManager {
             .send();
 
         if let Ok(response_inner) = response {
-            if response_inner.status() == StatusCode::Ok {
+            let status = response_inner.status();
+
+            if status == StatusCode::Ok {
                 debug!("{}: Request succeeded", LOG_NAME);
 
                 return Ok(());
+            } else {
+                warn!("{}: Got non-OK status code: {}", LOG_NAME, status);
             }
         }
 
