@@ -210,7 +210,7 @@ impl ReporterManager {
 
     fn get_load_ram() -> f32 {
         if let Ok(mem_info_value) = mem_info() {
-            1.00 - ((mem_info_value.free as f32) / (mem_info_value.total as f32))
+            1.00 - ((mem_info_value.avail as f32) / (mem_info_value.total as f32))
         } else {
             0.00
         }
