@@ -153,7 +153,17 @@ impl ReporterManager {
         thread::sleep(Duration::from_secs(10));
 
         loop {
-            self.report().ok();
+            if self.report().is_err() == true {
+                warn!(
+                    "{}: Last report failed, trying again sooner than usual",
+                    LOG_NAME
+                );
+
+                // Try reporting again after half the interval (this report failed)
+                thread::sleep(self.interval / 2);
+
+                self.report().ok();
+            }
 
             thread::sleep(self.interval);
         }
@@ -182,19 +192,20 @@ impl ReporterManager {
         // Submit report payload
         let response = self.client.post(&self.report_url).json(&payload).send();
 
-        if let Ok(response_inner) = response {
-            let status = response_inner.status();
+        match response {
+            Ok(response_inner) => {
+                let status = response_inner.status();
 
-            if status == StatusCode::Ok {
-                debug!("{}: Request succeeded", LOG_NAME);
+                if status == StatusCode::Ok {
+                    debug!("{}: Request succeeded", LOG_NAME);
 
-                return Ok(());
-            } else {
-                warn!("{}: Got non-OK status code: {}", LOG_NAME, status);
+                    return Ok(());
+                } else {
+                    warn!("{}: Got non-OK status code: {}", LOG_NAME, status);
+                }
             }
+            Err(err) => error!("{}: Failed dispatching request: {}", LOG_NAME, err),
         }
-
-        error!("{}: Failed dispatching request", LOG_NAME);
 
         Err(())
     }
