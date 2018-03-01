@@ -9,6 +9,19 @@
 
 Vigil Reporter is used to actively submit health information to Vigil from your apps. Apps are best monitored via application probes, which are able to report detailed system information such as CPU and RAM load. This lets Vigil show if an application host system is under high load.
 
+## Who uses it?
+
+<table>
+<tr>
+<td align="center"><a href="https://enrichdata.com/"><img src="https://valeriansaliou.github.io/rs-vigil-reporter/images/enrich.png" height="64" /></a></td>
+</tr>
+<tr>
+<td align="center">Enrich</td>
+</tr>
+</table>
+
+_👋 You use vigil-reporter and you want to be listed there? [Contact me](https://valeriansaliou.name/)._
+
 ## How to install?
 
 Include `vigil-reporter` in your `Cargo.toml` dependencies:
