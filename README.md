@@ -1,6 +1,6 @@
 # rs-vigil-reporter
 
-[![Build Status](https://img.shields.io/travis/valeriansaliou/rs-vigil-reporter/master.svg)](https://travis-ci.org/valeriansaliou/rs-vigil-reporter)
+[![Build Status](https://img.shields.io/travis/valeriansaliou/rs-vigil-reporter/master.svg)](https://travis-ci.org/valeriansaliou/rs-vigil-reporter) [![Dependency Status](https://deps.rs/repo/github/valeriansaliou/rs-vigil-reporter/status.svg)](https://deps.rs/repo/github/valeriansaliou/rs-vigil-reporter)
 
 * [Documentation](https://docs.rs/crate/vigil-reporter)
 * [Crate](https://crates.io/crates/vigil-reporter)
