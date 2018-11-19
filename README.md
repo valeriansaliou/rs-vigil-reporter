@@ -1,6 +1,6 @@
 # rs-vigil-reporter
 
-[![Build Status](https://img.shields.io/travis/valeriansaliou/rs-vigil-reporter/master.svg)](https://travis-ci.org/valeriansaliou/rs-vigil-reporter) [![Dependency Status](https://deps.rs/repo/github/valeriansaliou/rs-vigil-reporter/status.svg)](https://deps.rs/repo/github/valeriansaliou/rs-vigil-reporter)
+[![Build Status](https://img.shields.io/travis/valeriansaliou/rs-vigil-reporter/master.svg)](https://travis-ci.org/valeriansaliou/rs-vigil-reporter) [![Dependency Status](https://deps.rs/repo/github/valeriansaliou/rs-vigil-reporter/status.svg)](https://deps.rs/repo/github/valeriansaliou/rs-vigil-reporter) [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://www.buymeacoffee.com/valeriansaliou)
 
 * [Documentation](https://docs.rs/crate/vigil-reporter)
 * [Crate](https://crates.io/crates/vigil-reporter)
