@@ -213,7 +213,7 @@ impl ReporterManager {
     fn get_load_cpu() -> f32 {
         match (cpu_num(), loadavg()) {
             (Ok(cpu_num_value), Ok(loadavg_value)) => {
-                (loadavg_value.fifteen / (max(cpu_num_value, 1) as f64)) as f32
+                (loadavg_value.one / (max(cpu_num_value, 1) as f64)) as f32
             }
             _ => 0.00,
         }
