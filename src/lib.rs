@@ -4,16 +4,16 @@
 extern crate log;
 #[macro_use]
 extern crate serde_derive;
-extern crate sys_info;
 extern crate reqwest;
+extern crate sys_info;
 
+use std::cmp::max;
 use std::thread;
 use std::time::Duration;
-use std::cmp::max;
 
+use reqwest::header::{Authorization, Basic, Headers};
+use reqwest::{Client, RedirectPolicy, StatusCode};
 use sys_info::{cpu_num, loadavg, mem_info};
-use reqwest::{Client, StatusCode, RedirectPolicy};
-use reqwest::header::{Headers, Authorization, Basic};
 
 static LOG_NAME: &'static str = "Vigil Reporter";
 
@@ -184,9 +184,7 @@ impl ReporterManager {
 
         debug!(
             "{}: Will send request to URL: {} with payload: {:?}",
-            LOG_NAME,
-            &self.report_url,
-            payload
+            LOG_NAME, &self.report_url, payload
         );
 
         // Submit report payload
