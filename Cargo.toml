@@ -11,9 +11,6 @@ keywords = ["vigil", "microservices", "monitoring", "integration"]
 categories = ["web-programming"]
 authors = ["Valerian Saliou <valerian@valeriansaliou.name>"]
 
-[badges]
-travis-ci = { repository = "valeriansaliou/rs-vigil-reporter", branch = "master" }
-
 [lib]
 name = "vigil_reporter"
 
