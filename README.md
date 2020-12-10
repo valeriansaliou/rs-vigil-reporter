@@ -1,6 +1,6 @@
 # rs-vigil-reporter
 
-[![Build Status](https://img.shields.io/travis/valeriansaliou/rs-vigil-reporter/master.svg)](https://travis-ci.org/valeriansaliou/rs-vigil-reporter) [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://www.buymeacoffee.com/valeriansaliou)
+[![Test and Build](https://github.com/valeriansaliou/rs-vigil-reporter/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/valeriansaliou/rs-vigil-reporter/actions?query=workflow%3A%22Test+and+Build%22) [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://www.buymeacoffee.com/valeriansaliou)
 
 * [Documentation](https://docs.rs/crate/vigil-reporter)
 * [Crate](https://crates.io/crates/vigil-reporter)
