@@ -11,8 +11,9 @@ use std::cmp::max;
 use std::thread;
 use std::time::Duration;
 
-use reqwest::header::{Authorization, Basic, Headers};
-use reqwest::{Client, RedirectPolicy, StatusCode};
+use reqwest::blocking::Client;
+use reqwest::redirect::Policy as RedirectPolicy;
+use reqwest::StatusCode;
 use sys_info::{cpu_num, loadavg, mem_info};
 
 static LOG_NAME: &'static str = "Vigil Reporter";
@@ -32,6 +33,7 @@ pub struct ReporterBuilder<'a> {
 
 struct ReporterManager {
     report_url: String,
+    auth_token: String,
     replica_id: String,
     interval: Duration,
     client: Client,
@@ -68,19 +70,10 @@ impl<'a> Reporter<'a> {
         debug!("{}: Will run using URL: {}", LOG_NAME, self.url);
 
         // Build HTTP client
-        let mut headers = Headers::new();
-
-        headers.set(Authorization(Basic {
-            username: "".to_owned(),
-            password: Some(self.token.to_owned()),
-        }));
-
         let http_client = Client::builder()
             .timeout(Duration::from_secs(10))
             .redirect(RedirectPolicy::none())
             .gzip(true)
-            .enable_hostname_verification()
-            .default_headers(headers)
             .build();
 
         // Build thread manager context?
@@ -88,6 +81,7 @@ impl<'a> Reporter<'a> {
             (Some(probe_id), Some(node_id), Some(replica_id), Ok(client)) => {
                 let manager = ReporterManager {
                     report_url: format!("{}/reporter/{}/{}/", self.url, probe_id, node_id),
+                    auth_token: self.token.to_owned(),
                     replica_id: replica_id.to_owned(),
                     interval: self.interval,
                     client: client,
@@ -188,13 +182,18 @@ impl ReporterManager {
         );
 
         // Submit report payload
-        let response = self.client.post(&self.report_url).json(&payload).send();
+        let response = self
+            .client
+            .post(&self.report_url)
+            .basic_auth("", Some(&self.auth_token))
+            .json(&payload)
+            .send();
 
         match response {
             Ok(response_inner) => {
                 let status = response_inner.status();
 
-                if status == StatusCode::Ok {
+                if status == StatusCode::OK {
                     debug!("{}: Request succeeded", LOG_NAME);
 
                     return Ok(());

@@ -19,7 +19,7 @@ log = "0.4"
 serde = "1.0"
 serde_derive = "1.0"
 sys-info = "0.7"
-reqwest = "0.8"
+reqwest = { version = "0.10", features = ["native-tls-vendored", "gzip", "blocking", "json"], default-features = false }
 
 [dev-dependencies]
 env_logger = "0.5"
