@@ -1,12 +1,12 @@
-extern crate log;
 extern crate env_logger;
+extern crate log;
 extern crate vigil_reporter;
 
 use std::thread;
 use std::time::Duration;
 
-use log::LevelFilter;
 use env_logger::Builder;
+use log::LevelFilter;
 use vigil_reporter::Reporter;
 
 fn setup() {
@@ -21,11 +21,11 @@ fn initialize_valid() {
     setup();
 
     Reporter::new("http://status.example.com.local", "YOUR_TOKEN_SECRET")
-      .probe_id("relay")
-      .node_id("socket-client")
-      .replica_id("192.168.1.10")
-      .interval(Duration::from_secs(30))
-      .build();
+        .probe_id("relay")
+        .node_id("socket-client")
+        .replica_id("192.168.1.10")
+        .interval(Duration::from_secs(30))
+        .build();
 }
 
 #[test]
@@ -34,9 +34,9 @@ fn initialize_invalid_probe_id() {
     setup();
 
     Reporter::new("http://status.example.com.local", "YOUR_TOKEN_SECRET")
-      .node_id("socket-client")
-      .replica_id("192.168.1.10")
-      .build();
+        .node_id("socket-client")
+        .replica_id("192.168.1.10")
+        .build();
 }
 
 #[test]
@@ -45,9 +45,9 @@ fn initialize_invalid_node_id() {
     setup();
 
     Reporter::new("http://status.example.com.local", "YOUR_TOKEN_SECRET")
-      .probe_id("relay")
-      .replica_id("192.168.1.10")
-      .build();
+        .probe_id("relay")
+        .replica_id("192.168.1.10")
+        .build();
 }
 
 #[test]
@@ -56,9 +56,9 @@ fn initialize_invalid_replica_id() {
     setup();
 
     Reporter::new("http://status.example.com.local", "YOUR_TOKEN_SECRET")
-      .probe_id("relay")
-      .node_id("socket-client")
-      .build();
+        .probe_id("relay")
+        .node_id("socket-client")
+        .build();
 }
 
 #[test]
@@ -66,10 +66,10 @@ fn run_and_end_valid() {
     setup();
 
     let reporter = Reporter::new("http://status.example.com.local", "YOUR_TOKEN_SECRET")
-      .probe_id("relay")
-      .node_id("socket-client")
-      .replica_id("192.168.1.10")
-      .build();
+        .probe_id("relay")
+        .node_id("socket-client")
+        .replica_id("192.168.1.10")
+        .build();
 
     assert_eq!(reporter.run().is_ok(), true);
 
