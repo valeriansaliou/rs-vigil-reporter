@@ -18,7 +18,7 @@ name = "vigil_reporter"
 log = "0.4"
 serde = "1.0"
 serde_derive = "1.0"
-sys-info = "0.5"
+sys-info = "0.7"
 reqwest = "0.8"
 
 [dev-dependencies]
