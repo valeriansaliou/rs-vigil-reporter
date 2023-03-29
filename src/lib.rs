@@ -6,15 +6,23 @@ extern crate log;
 extern crate serde_derive;
 
 use std::cmp::max;
+use std::convert::TryFrom;
+use std::io;
 use std::thread;
 use std::time::Duration;
 
-use reqwest::blocking::Client;
-use reqwest::redirect::Policy as RedirectPolicy;
-use reqwest::StatusCode;
+use base64::engine::general_purpose::STANDARD as base64_encoder;
+use base64::Engine;
+use http_req::{
+    request::{Method, Request},
+    uri::Uri,
+};
+use serde_json;
 use sys_info::{cpu_num, loadavg, mem_info};
 
 static LOG_NAME: &'static str = "Vigil Reporter";
+
+pub const HTTP_CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub struct Reporter<'a> {
     url: &'a str,
@@ -30,11 +38,11 @@ pub struct ReporterBuilder<'a> {
 }
 
 struct ReporterManager {
-    report_url: String,
-    auth_token: String,
+    report_uri: String,
     replica_id: String,
     interval: Duration,
-    client: Client,
+    useragent: String,
+    authorization: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -67,22 +75,24 @@ impl<'a> Reporter<'a> {
     pub fn run(&self) -> Result<(), ()> {
         debug!("{}: Will run using URL: {}", LOG_NAME, self.url);
 
-        // Build HTTP client
-        let http_client = Client::builder()
-            .timeout(Duration::from_secs(10))
-            .redirect(RedirectPolicy::none())
-            .gzip(true)
-            .build();
-
         // Build thread manager context?
-        match (self.probe_id, self.node_id, self.replica_id, http_client) {
-            (Some(probe_id), Some(node_id), Some(replica_id), Ok(client)) => {
+        match (self.probe_id, self.node_id, self.replica_id) {
+            (Some(probe_id), Some(node_id), Some(replica_id)) => {
                 let manager = ReporterManager {
-                    report_url: format!("{}/reporter/{}/{}/", self.url, probe_id, node_id),
-                    auth_token: self.token.to_owned(),
+                    report_uri: format!("{}/reporter/{}/{}/", self.url, probe_id, node_id),
                     replica_id: replica_id.to_owned(),
                     interval: self.interval,
-                    client: client,
+
+                    useragent: format!(
+                        "rs-{}/{}",
+                        env!("CARGO_PKG_NAME"),
+                        env!("CARGO_PKG_VERSION")
+                    ),
+
+                    authorization: format!(
+                        "Basic {}",
+                        base64_encoder.encode(&format!(":{}", self.token))
+                    ),
                 };
 
                 // Spawn thread
@@ -176,32 +186,47 @@ impl ReporterManager {
 
         debug!(
             "{}: Will send request to URL: {} with payload: {:?}",
-            LOG_NAME, &self.report_url, payload
+            LOG_NAME, &self.report_uri, payload
         );
 
-        // Submit report payload
-        let response = self
-            .client
-            .post(&self.report_url)
-            .basic_auth("", Some(&self.auth_token))
-            .json(&payload)
-            .send();
+        // Encode payload to string
+        let payload_json = serde_json::to_vec(&payload).or(Err(()))?;
+
+        // Generate request URI
+        let request_uri = Uri::try_from(self.report_uri.as_str()).or(Err(()))?;
+
+        // Acquire report response
+        let mut response_sink = io::sink();
+
+        let response = Request::new(&request_uri)
+            .connect_timeout(Some(HTTP_CLIENT_TIMEOUT))
+            .read_timeout(Some(HTTP_CLIENT_TIMEOUT))
+            .write_timeout(Some(HTTP_CLIENT_TIMEOUT))
+            .method(Method::POST)
+            .header("User-Agent", &self.useragent)
+            .header("Authorization", &self.authorization)
+            .header("Content-Type", "application/json")
+            .header("Content-Length", &payload_json.len())
+            .body(&payload_json)
+            .send(&mut response_sink);
 
         match response {
-            Ok(response_inner) => {
-                let status = response_inner.status();
+            Ok(response) => {
+                let status_code = response.status_code();
 
-                if status == StatusCode::OK {
+                if status_code.is_success() {
                     debug!("{}: Request succeeded", LOG_NAME);
 
+                    // Return with success
                     return Ok(());
                 } else {
-                    warn!("{}: Got non-OK status code: {}", LOG_NAME, status);
+                    warn!("{}: Got non-OK status code: {}", LOG_NAME, status_code);
                 }
             }
             Err(err) => error!("{}: Failed dispatching request: {}", LOG_NAME, err),
         }
 
+        // Return with error
         Err(())
     }
 
