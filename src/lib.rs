@@ -4,8 +4,6 @@
 extern crate log;
 #[macro_use]
 extern crate serde_derive;
-extern crate reqwest;
-extern crate sys_info;
 
 use std::cmp::max;
 use std::thread;
